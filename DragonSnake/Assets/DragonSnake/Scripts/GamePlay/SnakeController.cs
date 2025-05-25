@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.XR;
+//using UnityEngine.XR;
 using System.Linq;
 
 namespace DragonSnake
 {
   /// <summary>
-  /// Controls the snake's movement in the VR "DragonSnake" game.
+  /// Controls the snake's movement and notifies the GameManager if the snake leaves the game area.
   /// The snake's head follows the player's head (camera) orientation on the horizontal plane.
   /// The XR Origin (XR Rig) is moved so that the Main Camera stays on the snake's head, giving the player the feeling of riding the snake.
   /// Uses world positions for robust alignment regardless of XR rig hierarchy or scaling.
@@ -32,15 +32,27 @@ namespace DragonSnake
       InitializeSnake();
     }
 
-    private void OnEnable()
+    // Use Start instead of OnEnable to ensure GameManager.Instance is initialized
+    // private void OnEnable()
+    private void Start()
     {
       // Subscribe to a fixed tick event from a central game loop or timer
       SnakeGameTick.OnTick += OnTick;
+      if (GameManager.Instance != null)
+      {
+        GameManager.Instance.OnLevelRestart += HandleLevelRestart;
+      }
+else Debug.Log("SnakeController.OnEnable(): GameManager.Instance == null");
     }
 
     private void OnDisable()
     {
       SnakeGameTick.OnTick -= OnTick;
+      if (GameManager.Instance != null)
+      {
+        GameManager.Instance.OnLevelRestart -= HandleLevelRestart;
+      }
+else Debug.Log("SnakeController.OnDisable(): GameManager.Instance == null");
     }
 
     private void InitializeSnake()
@@ -142,6 +154,26 @@ namespace DragonSnake
       // Y remains unchanged
 
       xrOrigin.position = desiredXROriginPos;
+
+      // Game Area Boundary Check (delegated to GameArea)
+      if (GameArea.Instance != null && !GameArea.Instance.IsWithinBounds(headSegmentWorldPos))
+      {
+        if (GameManager.Instance != null)
+          GameManager.Instance.LoseLife();
+else Debug.Log("SnakeController.OnTick(): trying to call LoseLife() but GameManager.Instance == null");
+      }
+    }
+
+    private void HandleLevelRestart()
+    {
+Debug.Log("SnakeController.RestartLevel()");
+      // Reset XR Origin to (0, current Y, 0)
+      if (xrOrigin != null)
+      {
+        Vector3 originPos = xrOrigin.position;
+        xrOrigin.position = new Vector3(0, originPos.y, 0);
+      }
+      InitializeSnake();
     }
   }
 }

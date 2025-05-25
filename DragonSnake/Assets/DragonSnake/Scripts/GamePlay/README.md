@@ -1,3 +1,13 @@
+# DragonSnake VR - Modular Game Architecture
+
+## Structure
+
+- **GameManager**: Handles game state, score, lives, level restart, and game over logic.
+- **GameArea**: Defines and checks the rectangular game area boundaries.
+- **SnakeController**: Handles snake movement and notifies GameManager if the snake leaves the game area.
+- **SnakeSegmentPool**: Object pool for snake segments.
+- **SnakeGameTick**: Provides a fixed tick event for game logic.
+
 # DragonSnake VR - Snake Movement Overview
 
 ## Snake Movement
@@ -15,15 +25,18 @@
 2. **Add `SnakeSegmentPool` to your scene** (one instance only):
     - Assign your segment prefab (sphere, radius=1) to the `segmentPrefab` field.
     - Set the initial pool size as needed for your expected maximum snake length.
-3. **Add `SnakeController` to an empty GameObject.**
-4. Assign the XR camera (player head, e.g., "Main Camera") to the `playerHead` field in `SnakeController`.
-5. Assign the XR Origin (XR Rig) GameObject to the `xrOrigin` field in `SnakeController`.
-6. Assign the same segment prefab to the `segmentPrefab` field in `SnakeController`.
-7. Play the scene. The snake will move in the direction the player is looking (on the horizontal plane), and the player will feel as if they are riding on the snake's head.
+3. **Add `GameManager` to your scene** (one instance only).
+4. **Add `GameArea` to your scene** (one instance only).
+    - Set `areaMin` and `areaMax` in the inspector to define the game rectangle.
+5. **Add `SnakeController` to an empty GameObject.**
+    - Assign references for `playerHead`, `xrOrigin`, and `segmentPrefab`.
+6. Play the scene. The snake will move in the direction the player is looking (on the horizontal plane), and the player will feel as if they are riding on the snake's head. The modular system will handle movement, boundaries, lives, and level restarts.
 
 ## Notes
 
 - The system is modular and event-driven, suitable for VR and high-performance requirements.
+- Each class has a single responsibility, making the codebase easier to maintain and extend.
+- All boundary checks and game logic are event-driven and modular.
 - No direct use of `Update` in gameplay logic.
 - **Snake segments are managed using an object pool (`SnakeSegmentPool`) to avoid performance issues from frequent instantiation and destruction.**
 - **XR Origin is moved every tick to keep the Main Camera on the snake's head, using world positions for robust alignment.**
