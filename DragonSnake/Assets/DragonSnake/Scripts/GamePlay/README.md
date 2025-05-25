@@ -7,6 +7,7 @@
 - The movement is processed at a fixed 60Hz tick using an event-driven system (`SnakeGameTick`), not via `Update`.
 - The snake starts with 5 segments, positioned as described in the game design.
 - **The XR Origin (XR Rig) is moved every tick so that the Main Camera's X and Z coordinates match the snake's head, giving the player the sensation of riding the snake.**
+- **The XR Origin alignment now uses `playerHead.position` (world position) for robust handling of any XR rig hierarchy or scaling.**
 
 ## How to Use
 
@@ -25,5 +26,5 @@
 - The system is modular and event-driven, suitable for VR and high-performance requirements.
 - No direct use of `Update` in gameplay logic.
 - **Snake segments are managed using an object pool (`SnakeSegmentPool`) to avoid performance issues from frequent instantiation and destruction.**
-- **XR Origin is moved every tick to keep the Main Camera on the snake's head.**
+- **XR Origin is moved every tick to keep the Main Camera on the snake's head, using world positions for robust alignment.**
 - Designed for Meta Quest 3 and portable to other VR platforms.

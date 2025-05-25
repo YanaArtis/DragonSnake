@@ -7,7 +7,9 @@ namespace DragonSnake
 {
   /// <summary>
   /// Controls the snake's movement in the VR "DragonSnake" game.
-  /// The snake's head follows the player's head (camera) position and orientation on the horizontal plane.
+  /// The snake's head follows the player's head (camera) orientation on the horizontal plane.
+  /// The XR Origin (XR Rig) is moved so that the Main Camera stays on the snake's head, giving the player the feeling of riding the snake.
+  /// Uses world positions for robust alignment regardless of XR rig hierarchy or scaling.
   /// The body segments follow the head smoothly, maintaining a fixed distance between each segment.
   /// </summary>
   public class SnakeController : MonoBehaviour
@@ -19,7 +21,7 @@ namespace DragonSnake
     [SerializeField] private GameObject segmentPrefab;
 
     [Header("References")]
-    [SerializeField] private Transform playerHead; // Assign XR camera here
+    [SerializeField] private Transform playerHead; // Assign XR camera here (e.g., "Main Camera")
     [SerializeField] private Transform xrOrigin;   // Assign XR Origin (XR Rig) here
 
     private readonly List<Transform> segments = new List<Transform>();
@@ -85,7 +87,7 @@ namespace DragonSnake
     /// <param name="deltaTime">Time since last tick.</param>
     private void OnTick(float deltaTime)
     {
-      if (segments.Count == 0 || playerHead == null)
+      if (segments.Count == 0 || playerHead == null || xrOrigin == null)
         return;
 
       // Move head in the direction the player's head is facing, but only on the horizontal plane
@@ -127,16 +129,16 @@ namespace DragonSnake
         headPositions.Dequeue();
 
       // --- XR Origin Movement Logic ---
-      // Move the XR Origin so that the Main Camera's X and Z match the snake's head segment
+      // Move the XR Origin so that the Main Camera's X and Z match the snake's head segment (using world positions)
       // (Y is not changed to avoid interfering with headset height/tracking)
-      Vector3 cameraLocalPos = playerHead.localPosition;
-      Vector3 xrOriginPos = xrOrigin.position;
-      Vector3 headSegmentPos = segments[0].position;
+      Vector3 cameraWorldPos = playerHead.position;
+      Vector3 xrOriginWorldPos = xrOrigin.position;
+      Vector3 headSegmentWorldPos = segments[0].position;
 
       // Calculate the offset needed to align Main Camera's XZ to the snake's head XZ
-      Vector3 desiredXROriginPos = xrOriginPos;
-      desiredXROriginPos.x += headSegmentPos.x - (xrOriginPos.x + cameraLocalPos.x);
-      desiredXROriginPos.z += headSegmentPos.z - (xrOriginPos.z + cameraLocalPos.z);
+      Vector3 desiredXROriginPos = xrOriginWorldPos;
+      desiredXROriginPos.x += headSegmentWorldPos.x - cameraWorldPos.x;
+      desiredXROriginPos.z += headSegmentWorldPos.z - cameraWorldPos.z;
       // Y remains unchanged
 
       xrOrigin.position = desiredXROriginPos;
