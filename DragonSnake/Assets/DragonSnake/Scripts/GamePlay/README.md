@@ -41,3 +41,31 @@
 - **Snake segments are managed using an object pool (`SnakeSegmentPool`) to avoid performance issues from frequent instantiation and destruction.**
 - **XR Origin is moved every tick to keep the Main Camera on the snake's head, using world positions for robust alignment.**
 - Designed for Meta Quest 3 and portable to other VR platforms.
+# DragonSnake VR - HUD Integration
+
+## HUD (Heads-Up Display)
+
+- The HUD shows the player's current score and remaining lives.
+- It automatically updates when lives change, the level restarts, or the game is over.
+
+### How to Use
+
+1. Add a Canvas to your scene (set to World Space or Screen Space as appropriate for VR).
+2. Add two TextMeshProUGUI elements for score and lives.
+3. Create an empty GameObject and attach the `HUD` script.
+4. Assign the TextMeshProUGUI references (`txtScore`, `txtLives`) in the Inspector.
+5. Ensure the `GameManager` is present in the scene.
+
+## Example Hierarchy
+
+Canvas (World Space)
+├── ScoreText (TextMeshProUGUI)
+└── LivesText (TextMeshProUGUI)
+HUD (attach to Canvas or another GameObject)
+
+
+## Notes
+
+- The score logic is a placeholder; update it when you implement scoring.
+- The HUD listens to `GameManager` events for automatic updates.
+- Make sure to assign the references in the Inspector.

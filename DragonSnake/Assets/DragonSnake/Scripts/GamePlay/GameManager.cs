@@ -17,6 +17,10 @@ namespace DragonSnake
     [SerializeField] private int startingLives = 3;
     private int currentLives;
 
+    // Add this property for future score logic
+    public int CurrentScore { get; private set; } = 0;
+
+
     private void Awake()
     {
       if (Instance != null && Instance != this)
@@ -68,5 +72,12 @@ Debug.Log("GameManager.ResetGame()");
     }
 
     public int GetCurrentLives() => currentLives;
+
+    // Add methods to modify score as needed in the future
+    public void AddScore(int amount)
+    {
+      CurrentScore += amount;
+      // Optionally, add an event for score changed if you want HUD to update immediately
+    }
   }
 }
