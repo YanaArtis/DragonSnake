@@ -1,2 +1,2 @@
 # DragonSnake
-Remake of my old "DragonSnake" VR game I create in collaboration with Code Maestro
+Remake of my old "DragonSnake" VR game I create for Oculus Quest headsets in collaboration with Code Maestro.
