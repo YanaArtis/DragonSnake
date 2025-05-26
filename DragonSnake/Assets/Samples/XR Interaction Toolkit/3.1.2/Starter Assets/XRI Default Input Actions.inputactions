@@ -3397,6 +3397,34 @@
                     "isPartOfComposite": true
                 }
             ]
+        },
+        {
+            "name": "DragonSnake",
+            "id": "aa59a58f-5471-4ccc-8210-77008d8edd73",
+            "actions": [
+                {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "47f080cf-e152-4c8f-993c-f4069f3456d2",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "0f8b3cde-c9dd-4f37-94cf-13cbb21513d8",
+                    "path": "<XRController>{LeftHand}/{MenuButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []
