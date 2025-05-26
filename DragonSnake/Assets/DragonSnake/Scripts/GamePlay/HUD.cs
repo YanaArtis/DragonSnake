@@ -83,8 +83,8 @@ namespace DragonSnake
           txtOverlay.gameObject.SetActive(false);
           break;
         case GameState.Paused:
-          txtOverlay.text = "PAUSED\nResume | Finish | Quit";
-          txtOverlay.gameObject.SetActive(true);
+          // Hide overlay since the Pause Menu Window with interactable buttons is now shown
+          txtOverlay.gameObject.SetActive(false);
           break;
         case GameState.LevelCompleted:
           txtOverlay.text = "Level Completed!";
