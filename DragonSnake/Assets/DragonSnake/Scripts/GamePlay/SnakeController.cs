@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
-//using UnityEngine.XR;
 using System.Linq;
 
 namespace DragonSnake
 {
   /// <summary>
   /// Controls the snake's movement and notifies the GameManager if the snake leaves the game area.
+  /// Movement is only active in the Playing state.
   /// The snake's head follows the player's head (camera) orientation on the horizontal plane.
   /// The XR Origin (XR Rig) is moved so that the Main Camera stays on the snake's head, giving the player the feeling of riding the snake.
   /// Uses world positions for robust alignment regardless of XR rig hierarchy or scaling.
@@ -40,9 +40,9 @@ namespace DragonSnake
       SnakeGameTick.OnTick += OnTick;
       if (GameManager.Instance != null)
       {
-        GameManager.Instance.OnLevelRestart += HandleLevelRestart;
+        GameManager.Instance.OnGameStateChanged += OnGameStateChanged;
       }
-else Debug.Log("SnakeController.OnEnable(): GameManager.Instance == null");
+else Debug.Log("SnakeController.Start(): GameManager.Instance == null");
     }
 
     private void OnDisable()
@@ -50,7 +50,7 @@ else Debug.Log("SnakeController.OnEnable(): GameManager.Instance == null");
       SnakeGameTick.OnTick -= OnTick;
       if (GameManager.Instance != null)
       {
-        GameManager.Instance.OnLevelRestart -= HandleLevelRestart;
+        GameManager.Instance.OnGameStateChanged -= OnGameStateChanged;
       }
 else Debug.Log("SnakeController.OnDisable(): GameManager.Instance == null");
     }
@@ -93,12 +93,30 @@ else Debug.Log("SnakeController.OnDisable(): GameManager.Instance == null");
       }
     }
 
+    private void OnGameStateChanged(GameState prev, GameState next)
+    {
+      if (next == GameState.Countdown || next == GameState.NotStarted || next == GameState.LevelFailed || next == GameState.GameOver)
+      {
+        // Reset snake and XR Origin
+        if (xrOrigin != null)
+        {
+          Vector3 originPos = xrOrigin.position;
+          xrOrigin.position = new Vector3(0, originPos.y, 0);
+        }
+        InitializeSnake();
+      }
+    }
+
     /// <summary>
     /// Called on each fixed tick (e.g., 60Hz) by the game tick system.
     /// </summary>
     /// <param name="deltaTime">Time since last tick.</param>
     private void OnTick(float deltaTime)
     {
+      // Only move the snake in the Playing state
+      if (GameManager.Instance == null || GameManager.Instance.State != GameState.Playing)
+        return;
+
       if (segments.Count == 0 || playerHead == null || xrOrigin == null)
         return;
 
@@ -162,18 +180,6 @@ else Debug.Log("SnakeController.OnDisable(): GameManager.Instance == null");
           GameManager.Instance.LoseLife();
 else Debug.Log("SnakeController.OnTick(): trying to call LoseLife() but GameManager.Instance == null");
       }
-    }
-
-    private void HandleLevelRestart()
-    {
-Debug.Log("SnakeController.RestartLevel()");
-      // Reset XR Origin to (0, current Y, 0)
-      if (xrOrigin != null)
-      {
-        Vector3 originPos = xrOrigin.position;
-        xrOrigin.position = new Vector3(0, originPos.y, 0);
-      }
-      InitializeSnake();
     }
   }
 }

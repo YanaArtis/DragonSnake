@@ -1,3 +1,86 @@
+# DragonSnake VR - UI System
+
+## UI Architecture
+
+The UI system consists of:
+
+- **GameUI**: Manages UI windows and button interactions based on game state
+- **HUD**: Displays game information (score, lives) and state-specific overlays
+- **UI Windows**: Separate UI panels for different game states
+
+## UI Windows
+
+### Start Game Window
+- Shown in `NotStarted` and `GameOver` states
+- Contains "START GAME" button
+- Should be a child of your main Canvas
+
+### Pause Menu Window
+- Shown in `Paused` state
+- Contains "Resume", "Finish Session", and "Quit" buttons
+- Should be a child of your main Canvas
+
+### In-Game Controls
+- Pause button visible only during `Playing` state
+- Can be positioned as a floating UI element in VR space
+
+## Setup Instructions
+
+1. **Create UI Canvas** (World Space recommended for VR)
+2. **Create Start Game Window**:
+   - Add Panel as child of Canvas
+   - Add "START GAME" button inside the panel
+3. **Create Pause Menu Window**:
+   - Add Panel as child of Canvas
+   - Add "Resume", "Finish Session", and "Quit" buttons inside
+4. **Create In-Game Pause Button**:
+   - Add Button as child of Canvas or as floating UI
+5. **Attach GameUI Script**:
+   - Assign all window GameObjects and buttons in Inspector
+6. **The system will automatically show/hide windows based on game state**
+
+## Notes
+
+- All UI state management is automatic based on GameManager state changes
+- Windows are hidden by default and shown only when appropriate
+- The pause button is only visible during gameplay
+- UI follows VR best practices with World Space Canvas
+
+# DragonSnake VR - State Machine Architecture
+
+## Game States
+
+The game uses a state machine for robust, modular logic. The main states are:
+
+1. **NotStarted**: Game session not started. Shows "START GAME" button.
+2. **Countdown**: Countdown before level/game session starts. Shows level number and countdown.
+3. **Playing**: Player rides the snake.
+4. **Paused**: In-game menu with options to resume, finish session, or quit.
+5. **LevelCompleted**: Player completed the level.
+6. **LevelFailed**: Player lost a life but has lives left.
+7. **GameOver**: Player lost all lives.
+
+## How It Works
+
+- `GameManager` manages the state machine and exposes events for state changes.
+- `SnakeController` only moves the snake in the `Playing` state.
+- `HUD` updates UI elements and overlays based on the current state.
+- `GameUI` handles button presses and calls `GameManager` methods.
+
+## Integration Steps
+
+1. Add `GameManager`, `SnakeController`, `HUD`, and `GameUI` to your scene.
+2. Wire up UI buttons to the `GameUI` script.
+3. Assign TextMeshProUGUI fields in `HUD` for score, lives, and overlay.
+4. The system will handle state transitions and UI automatically.
+
+## Notes
+
+- You can add more states or transitions as needed.
+- All state transitions are event-driven and modular.
+- Extend the state machine for more complex game logic as your project grows.
+
+
 # DragonSnake VR - Modular Game Architecture
 
 ## Structure
