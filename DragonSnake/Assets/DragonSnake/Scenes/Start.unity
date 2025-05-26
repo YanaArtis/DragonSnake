@@ -1444,6 +1444,61 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 869982054}
   m_CullTransparentMesh: 1
+--- !u!1 &949922355
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 949922357}
+  - component: {fileID: 949922356}
+  m_Layer: 0
+  m_Name: AppleSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &949922356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 949922355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9744354b2c4a84843822a7fd7e72a791, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  applePrefab: {fileID: 3741490701221671447, guid: 9dc01e0e1f9bc2d4e80247ca22f296f7, type: 3}
+  spawnInterval: 5
+  maxApples: 5
+  appleRadius: 0.5
+  maxSpawnAttempts: 50
+  initialPoolSize: 10
+  expandPoolIfNeeded: 1
+  obstacleLayerMask:
+    serializedVersion: 2
+    m_Bits: 7340032
+  collisionCheckRadius: 0.6
+--- !u!4 &949922357
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 949922355}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1003929536
 GameObject:
   m_ObjectHideFlags: 0
@@ -2982,3 +3037,4 @@ SceneRoots:
   - {fileID: 231099601}
   - {fileID: 1154336428}
   - {fileID: 361734260}
+  - {fileID: 949922357}

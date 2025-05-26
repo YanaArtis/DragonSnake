@@ -14,6 +14,8 @@ namespace DragonSnake
   /// </summary>
   public class SnakeController : MonoBehaviour
   {
+    public static SnakeController Instance { get; private set; }
+
     [Header("Snake Settings")]
     [SerializeField] private int initialLength = 5;
     [SerializeField] private float segmentRadius = 1f;
@@ -29,6 +31,13 @@ namespace DragonSnake
 
     private void Awake()
     {
+      if (Instance != null && Instance != this)
+      {
+        Destroy(gameObject);
+        return;
+      }
+      Instance = this;
+
       InitializeSnake();
     }
 
@@ -77,6 +86,17 @@ else Debug.Log("SnakeController.OnDisable(): GameManager.Instance == null");
         segObj.transform.SetParent(transform);
         segObj.transform.position = pos;
         segObj.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+
+        // Tag the head segment differently for apple collision detection
+        if (i == 0)
+        {
+          segObj.tag = "SnakeHead";
+        }
+        else
+        {
+          segObj.tag = "Snake";
+        }
+
         segments.Add(segObj.transform);
         headPositions.Enqueue(pos);
       }
@@ -181,5 +201,12 @@ else Debug.Log("SnakeController.OnDisable(): GameManager.Instance == null");
 else Debug.Log("SnakeController.OnTick(): trying to call LoseLife() but GameManager.Instance == null");
       }
     }
+
+    /// <summary>
+    /// Returns a read-only list of snake segments for collision detection.
+    /// </summary>
+    public IReadOnlyList<Transform> GetSegments() => segments.AsReadOnly();
+
+    public float GetSegmentRadius() => segmentRadius;
   }
 }

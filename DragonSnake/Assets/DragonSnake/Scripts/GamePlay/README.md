@@ -1,3 +1,59 @@
+# DragonSnake VR - Apple Spawning System
+
+## Apple System Components
+
+### Apple.cs
+- Represents individual apples that can be eaten by the snake
+- Handles collision detection with snake segments
+- Awards points when eaten
+- Auto-destroys after a configurable lifetime
+
+### AppleSpawner.cs
+- Manages apple spawning at regular intervals (default: 5 seconds)
+- Ensures apples spawn in free space (no collisions)
+- Limits maximum number of apples on field
+- Integrates with game state system (only spawns during Playing state)
+
+## Setup Instructions
+
+1. **Create Apple Prefab:**
+   - Create a sphere GameObject
+   - Scale it to match snake segment radius
+   - Add a Collider component (set as Trigger)
+   - Add the `Apple` script
+   - Tag it appropriately for collision detection
+   - Save as prefab
+
+2. **Setup AppleSpawner:**
+   - Add `AppleSpawner` script to a GameObject in your scene
+   - Assign the apple prefab to the `applePrefab` field
+   - Configure spawn settings (interval, max apples, etc.)
+   - Set up layer masks for obstacle detection
+
+3. **Configure Snake Segments:**
+   - Ensure snake segments have appropriate tags ("SnakeHead", "Snake")
+   - Add colliders to snake segments if not already present
+
+4. **Layer Setup:**
+   - Create layers for different object types (Snake, Apple, Obstacles)
+   - Configure the `obstacleLayerMask` in AppleSpawner to detect walls/obstacles
+
+## Configuration Options
+
+- **Spawn Interval**: How often apples spawn (default: 5 seconds)
+- **Max Apples**: Maximum apples on field simultaneously
+- **Apple Lifetime**: How long apples persist if not eaten
+- **Score Value**: Points awarded when apple is eaten
+- **Collision Detection**: Configurable radius and layer masks
+
+## Integration Notes
+
+- Apples only spawn during `GameState.Playing`
+- All apples are cleared when game state changes (pause, game over, etc.)
+- Score is automatically added to GameManager when apples are eaten
+- System uses singleton pattern for easy access from other components
+
+
 # DragonSnake VR - UI System
 
 ## UI Architecture

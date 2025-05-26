@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 3
   tags:
   - Anchor
+  - Apple
+  - Snake
+  - SnakeHead
   layers:
   - Default
   - TransparentFX
@@ -26,9 +29,9 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
-  - 
+  - Snake
+  - Apple
+  - Obstacles
   - 
   - 
   - 
