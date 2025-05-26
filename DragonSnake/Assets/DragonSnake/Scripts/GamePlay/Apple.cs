@@ -32,6 +32,8 @@ namespace DragonSnake
 
     private void OnTriggerEnter(Collider other)
     {
+      Debug.Log($"Apple.OnTriggerEnter(\"{other.gameObject.name}\")");
+
       // Check if snake head touched the apple
       if (!isPooled && (other.CompareTag("SnakeHead") || other.CompareTag("Snake")))
       {
