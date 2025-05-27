@@ -5,6 +5,7 @@ namespace DragonSnake
   /// <summary>
   /// Represents an apple that the snake can eat for points.
   /// Uses object pooling for efficient memory management.
+  /// Only the snake head can eat apples.
   /// </summary>
   public class Apple : MonoBehaviour
   {
@@ -35,7 +36,8 @@ namespace DragonSnake
       Debug.Log($"Apple.OnTriggerEnter(\"{other.gameObject.name}\")");
 
       // Check if snake head touched the apple
-      if (!isPooled && (other.CompareTag("SnakeHead") || other.CompareTag("Snake")))
+      // Only snake head can eat apples - check specifically for "SnakeHead" tag
+      if (!isPooled && other.CompareTag("SnakeHead"))
       {
         // Add score
         if (GameManager.Instance != null)
@@ -45,6 +47,7 @@ namespace DragonSnake
 
         ReturnToPool();
       }
+      // Ignore collisions with other snake segments (tagged as "Snake")
     }
 
     private void ReturnToPool()
