@@ -6,6 +6,7 @@ namespace DragonSnake
   /// Represents an apple that the snake can eat for points.
   /// Uses object pooling for efficient memory management.
   /// Only the snake head can eat apples.
+  /// Lifetime countdown pauses when game is paused.
   /// </summary>
   public class Apple : MonoBehaviour
   {
@@ -14,20 +15,35 @@ namespace DragonSnake
     [SerializeField] private float lifetime = 30f; // Apple disappears after 30 seconds if not eaten
 
     private float spawnTime;
+    private float pausedTime = 0f; // Total time spent paused
     private bool isPooled = false;
 
     private void OnEnable()
     {
-      // Reset spawn time when apple is activated from pool
+      // Reset spawn time and paused time when apple is activated from pool
       spawnTime = Time.time;
+      pausedTime = 0f;
     }
 
     private void Update()
     {
       // Only check lifetime if apple is active and not pooled
-      if (!isPooled && Time.time - spawnTime > lifetime)
+      if (!isPooled)
       {
-        ReturnToPool();
+        // Only decrease lifetime when game is in Playing state
+        if (GameManager.Instance != null && GameManager.Instance.State == GameState.Playing)
+        {
+          float actualLifetime = Time.time - spawnTime - pausedTime;
+          if (actualLifetime > lifetime)
+          {
+            ReturnToPool();
+          }
+        }
+        // If game is paused, track the paused time
+        else if (GameManager.Instance != null && GameManager.Instance.State == GameState.Paused)
+        {
+          pausedTime += Time.deltaTime;
+        }
       }
     }
 
@@ -37,17 +53,17 @@ namespace DragonSnake
 
       // Check if snake head touched the apple
       // Only snake head can eat apples - check specifically for "SnakeHead" tag
-      if (!isPooled && other.CompareTag("SnakeHead"))
+      // Also only allow eating during Playing state
+      if (!isPooled && other.CompareTag("SnakeHead") &&
+        GameManager.Instance != null && GameManager.Instance.State == GameState.Playing)
       {
         // Add score
-        if (GameManager.Instance != null)
-        {
-          GameManager.Instance.AddScore(scoreValue);
-        }
+        GameManager.Instance.AddScore(scoreValue);
+        Debug.Log($"Apple eaten by snake head! Score: +{scoreValue}");
 
         ReturnToPool();
       }
-      // Ignore collisions with other snake segments (tagged as "Snake")
+      // Ignore collisions with other snake segments (tagged as "Snake") or during non-playing states
     }
 
     private void ReturnToPool()
@@ -67,7 +83,18 @@ namespace DragonSnake
     public void ResetApple()
     {
       spawnTime = Time.time;
+      pausedTime = 0f;
       // Reset any other apple-specific state here if needed
+    }
+
+    /// <summary>
+    /// Gets the remaining lifetime of this apple (for debugging purposes)
+    /// </summary>
+    public float GetRemainingLifetime()
+    {
+      if (isPooled) return 0f;
+      float actualLifetime = Time.time - spawnTime - pausedTime;
+      return Mathf.Max(0f, lifetime - actualLifetime);
     }
   }
 }

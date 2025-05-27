@@ -74,12 +74,20 @@ namespace DragonSnake
           StartSpawning();
           break;
         case GameState.NotStarted:
-        case GameState.Paused:
         case GameState.LevelFailed:
         case GameState.LevelCompleted:
         case GameState.GameOver:
           StopSpawning();
           break;
+        case GameState.Paused:
+          // Only stop spawning new apples, but don't clear existing ones
+          if (spawnCoroutine != null)
+          {
+            StopCoroutine(spawnCoroutine);
+            spawnCoroutine = null;
+          }
+          break;
+        // GameState.Countdown - no action needed, let spawning continue from previous state
       }
     }
 
