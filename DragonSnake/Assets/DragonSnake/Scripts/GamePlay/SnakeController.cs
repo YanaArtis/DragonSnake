@@ -13,6 +13,7 @@ namespace DragonSnake
   /// Uses world positions for robust alignment regardless of XR rig hierarchy or scaling.
   /// The body segments follow the head smoothly, maintaining a fixed distance between each segment.
   /// Uses separate prefabs for head and body segments.
+  /// Handles snake growth when eating apples.
   /// </summary>
   public class SnakeController : MonoBehaviour
   {
@@ -22,6 +23,7 @@ namespace DragonSnake
     [SerializeField] private int initialLength = 5;
     [SerializeField] private float segmentRadius = 1f;
     [SerializeField] private float moveSpeed = 2.5f; // Units per second
+    [SerializeField] private int growthPerApple = 2; // How many segments to add per apple
 
     [Header("Prefab References")]
     [SerializeField] private GameObject headPrefab;
@@ -34,6 +36,7 @@ namespace DragonSnake
     private readonly List<Transform> segments = new List<Transform>();
     private readonly Queue<Vector3> headPositions = new Queue<Vector3>();
     private SnakeHeadCollisionDetector headCollisionDetector;
+    private int pendingGrowth = 0; // Segments waiting to be added
 
     private void Awake()
     {
@@ -88,6 +91,7 @@ else Debug.Log("SnakeController.OnDisable(): GameManager.Instance == null");
       }
       segments.Clear();
       headPositions.Clear();
+      pendingGrowth = 0; // Reset pending growth
 
       // Create head and body segments from pool
       Vector3 startPos = Vector3.zero;
@@ -179,6 +183,13 @@ else Debug.Log("SnakeController.OnDisable(): GameManager.Instance == null");
       // Store head position for body following
       headPositions.Enqueue(newHeadPos);
 
+      // Handle snake growth
+      if (pendingGrowth > 0)
+      {
+        AddSegment();
+        pendingGrowth--;
+      }
+
       // Move each segment to follow the previous one, maintaining fixed distance
       for (int i = 1; i < segments.Count; i++)
       {
@@ -227,10 +238,61 @@ else Debug.Log("SnakeController.OnTick(): trying to call LoseLife() but GameMana
     }
 
     /// <summary>
+    /// Triggers snake growth by the specified number of segments.
+    /// Called when the snake eats an apple.
+    /// </summary>
+    public void GrowSnake(int segmentCount = -1)
+    {
+      if (segmentCount < 0)
+        segmentCount = growthPerApple;
+
+      pendingGrowth += segmentCount;
+      Debug.Log($"Snake will grow by {segmentCount} segments. Pending growth: {pendingGrowth}");
+    }
+
+    /// <summary>
+    /// Adds a single segment to the end of the snake.
+    /// </summary>
+    private void AddSegment()
+    {
+      if (segments.Count == 0) return;
+
+      // Get the last segment (tail)
+      Transform lastSegment = segments[segments.Count - 1];
+
+      // Calculate position for new segment (behind the current tail)
+      Vector3 tailDirection = lastSegment.forward;
+      Vector3 newSegmentPos = lastSegment.position - tailDirection * segmentRadius;
+      newSegmentPos.y = 0;
+
+      // Create new body segment
+      GameObject newSegObj = SnakeSegmentPool.Instance.GetBodySegment();
+      newSegObj.tag = "Snake";
+      newSegObj.transform.SetParent(transform);
+      newSegObj.transform.position = newSegmentPos;
+      newSegObj.transform.rotation = lastSegment.rotation;
+
+      // Add to segments list
+      segments.Add(newSegObj.transform);
+
+      Debug.Log($"Added new segment. Snake length: {segments.Count}");
+    }
+
+    /// <summary>
     /// Returns a read-only list of snake segments for collision detection.
     /// </summary>
     public IReadOnlyList<Transform> GetSegments() => segments.AsReadOnly();
 
     public float GetSegmentRadius() => segmentRadius;
+
+    /// <summary>
+    /// Gets the current length of the snake.
+    /// </summary>
+    public int GetCurrentLength() => segments.Count;
+
+    /// <summary>
+    /// Gets the number of segments waiting to be added.
+    /// </summary>
+    public int GetPendingGrowth() => pendingGrowth;
   }
 }

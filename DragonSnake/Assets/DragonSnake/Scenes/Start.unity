@@ -683,9 +683,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c47ad5dedcee60c4db0aa006b528a90b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  initialLength: 15
+  initialLength: 5
   segmentRadius: 1
   moveSpeed: 2.5
+  growthPerApple: 2
   headPrefab: {fileID: 4693313988768961510, guid: 366c593f9b3e7c740a632141a7627d5f, type: 3}
   bodySegmentPrefab: {fileID: 6839222700200126762, guid: 38bf25d7c8670e448b6f2928172e09ee, type: 3}
   playerHead: {fileID: 1791916281}

@@ -7,6 +7,7 @@ namespace DragonSnake
   /// Uses object pooling for efficient memory management.
   /// Only the snake head can eat apples.
   /// Lifetime countdown pauses when game is paused.
+  /// Triggers snake growth when eaten.
   /// </summary>
   public class Apple : MonoBehaviour
   {
@@ -59,7 +60,17 @@ namespace DragonSnake
       {
         // Add score
         GameManager.Instance.AddScore(scoreValue);
-        Debug.Log($"Apple eaten by snake head! Score: +{scoreValue}");
+
+        // Trigger snake growth
+        if (SnakeController.Instance != null)
+        {
+          SnakeController.Instance.GrowSnake();
+          Debug.Log($"Apple eaten! Score: +{scoreValue}, Snake will grow by 2 segments");
+        }
+        else
+        {
+          Debug.LogWarning("Apple eaten but SnakeController.Instance is null!");
+        }
 
         ReturnToPool();
       }
