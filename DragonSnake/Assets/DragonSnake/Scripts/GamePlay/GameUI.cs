@@ -17,11 +17,12 @@ namespace DragonSnake
 
     [Header("Start Game Window")]
     [SerializeField] private Button btnStartGame;
+    [SerializeField] private Button btnQuitFromStart; // New Quit button for Start Game Window
 
     [Header("Pause Menu Window")]
     [SerializeField] private Button btnResume;
     [SerializeField] private Button btnFinishSession;
-    [SerializeField] private Button btnQuit;
+    [SerializeField] private Button btnQuit; // Existing Quit button for Pause Menu
 
     [Header("Input Actions")]
     [SerializeField] private InputActionReference pauseAction; // Assign the pause action here
@@ -43,9 +44,13 @@ namespace DragonSnake
 
     private void Start()
     {
-      // Wire up button events
+      // Wire up Start Game Window button events
       if (btnStartGame != null)
         btnStartGame.onClick.AddListener(() => GameManager.Instance?.StartGame());
+      if (btnQuitFromStart != null)
+        btnQuitFromStart.onClick.AddListener(() => GameManager.Instance?.QuitGame());
+
+      // Wire up Pause Menu Window button events
       if (btnResume != null)
         btnResume.onClick.AddListener(() => GameManager.Instance?.ResumeGame());
       if (btnFinishSession != null)
