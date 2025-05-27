@@ -7,10 +7,12 @@ namespace DragonSnake
   /// <summary>
   /// Controls the snake's movement and notifies the GameManager if the snake leaves the game area.
   /// Movement is only active in the Playing state.
+  /// Now includes self-collision detection.
   /// The snake's head follows the player's head (camera) orientation on the horizontal plane.
   /// The XR Origin (XR Rig) is moved so that the Main Camera stays on the snake's head, giving the player the feeling of riding the snake.
   /// Uses world positions for robust alignment regardless of XR rig hierarchy or scaling.
   /// The body segments follow the head smoothly, maintaining a fixed distance between each segment.
+  /// Uses separate prefabs for head and body segments.
   /// </summary>
   public class SnakeController : MonoBehaviour
   {
@@ -20,7 +22,10 @@ namespace DragonSnake
     [SerializeField] private int initialLength = 5;
     [SerializeField] private float segmentRadius = 1f;
     [SerializeField] private float moveSpeed = 2.5f; // Units per second
-    [SerializeField] private GameObject segmentPrefab;
+
+    [Header("Prefab References")]
+    [SerializeField] private GameObject headPrefab;
+    [SerializeField] private GameObject bodySegmentPrefab;
 
     [Header("References")]
     [SerializeField] private Transform playerHead; // Assign XR camera here (e.g., "Main Camera")
@@ -28,6 +33,7 @@ namespace DragonSnake
 
     private readonly List<Transform> segments = new List<Transform>();
     private readonly Queue<Vector3> headPositions = new Queue<Vector3>();
+    private SnakeHeadCollisionDetector headCollisionDetector;
 
     private void Awake()
     {
@@ -67,10 +73,18 @@ else Debug.Log("SnakeController.OnDisable(): GameManager.Instance == null");
     private void InitializeSnake()
     {
       // Instead of destroying, return segments to pool
+      // Return all segments to their respective pools
       foreach (var seg in segments)
       {
         if (seg != null)
-          SnakeSegmentPool.Instance.ReturnSegment(seg.gameObject);
+          if (seg.CompareTag("SnakeHead"))
+          {
+            SnakeSegmentPool.Instance.ReturnHeadSegment(seg.gameObject);
+          }
+          else
+          {
+            SnakeSegmentPool.Instance.ReturnBodySegment(seg.gameObject);
+          }
       }
       segments.Clear();
       headPositions.Clear();
@@ -82,20 +96,30 @@ else Debug.Log("SnakeController.OnDisable(): GameManager.Instance == null");
       for (int i = 0; i < initialLength; i++)
       {
         Vector3 pos = startPos - dir * segmentRadius * i;
-        GameObject segObj = SnakeSegmentPool.Instance.GetSegment();
-        segObj.transform.SetParent(transform);
-        segObj.transform.position = pos;
-        segObj.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+        GameObject segObj;
 
-        // Tag the head segment differently for apple collision detection
+        // Create head segment (first segment) or body segment
         if (i == 0)
         {
+          segObj = SnakeSegmentPool.Instance.GetHeadSegment();
           segObj.tag = "SnakeHead";
+
+          // Add head collision detector if not already present
+          headCollisionDetector = segObj.GetComponent<SnakeHeadCollisionDetector>();
+          if (headCollisionDetector == null)
+          {
+            headCollisionDetector = segObj.AddComponent<SnakeHeadCollisionDetector>();
+          }
         }
         else
         {
+          segObj = SnakeSegmentPool.Instance.GetBodySegment();
           segObj.tag = "Snake";
         }
+
+        segObj.transform.SetParent(transform);
+        segObj.transform.position = pos;
+        segObj.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
 
         segments.Add(segObj.transform);
         headPositions.Enqueue(pos);

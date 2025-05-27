@@ -575,8 +575,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6bef2cdae835be04dbccb9c897d57e53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  segmentPrefab: {fileID: 6839222700200126762, guid: 38bf25d7c8670e448b6f2928172e09ee, type: 3}
-  initialPoolSize: 32
+  headPrefab: {fileID: 4693313988768961510, guid: 366c593f9b3e7c740a632141a7627d5f, type: 3}
+  bodySegmentPrefab: {fileID: 6839222700200126762, guid: 38bf25d7c8670e448b6f2928172e09ee, type: 3}
+  initialHeadPoolSize: 5
+  initialBodyPoolSize: 50
 --- !u!4 &231099601
 Transform:
   m_ObjectHideFlags: 0
@@ -655,7 +657,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &439488502
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1056,7 +1058,8 @@ MonoBehaviour:
   initialLength: 15
   segmentRadius: 1
   moveSpeed: 2.5
-  segmentPrefab: {fileID: 6839222700200126762, guid: 38bf25d7c8670e448b6f2928172e09ee, type: 3}
+  headPrefab: {fileID: 4693313988768961510, guid: 366c593f9b3e7c740a632141a7627d5f, type: 3}
+  bodySegmentPrefab: {fileID: 6839222700200126762, guid: 38bf25d7c8670e448b6f2928172e09ee, type: 3}
   playerHead: {fileID: 1791916281}
   xrOrigin: {fileID: 1791916282}
 --- !u!4 &568200054
