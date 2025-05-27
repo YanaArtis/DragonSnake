@@ -8,12 +8,13 @@ namespace DragonSnake
   /// </summary>
   public class SnakeSegmentPool : MonoBehaviour
   {
+    public static SnakeSegmentPool Instance { get; private set; }
+
+    [Header("Pool Settings")]
     [SerializeField] private GameObject segmentPrefab;
-    [SerializeField] private int initialPoolSize = 32;
+    [SerializeField] private int initialPoolSize = 20;
 
     private readonly Queue<GameObject> pool = new Queue<GameObject>();
-
-    public static SnakeSegmentPool Instance { get; private set; }
 
     private void Awake()
     {
@@ -23,37 +24,90 @@ namespace DragonSnake
         return;
       }
       Instance = this;
-      Prewarm();
-    }
-
-    private void Prewarm()
-    {
-      for (int i = 0; i < initialPoolSize; i++)
-      {
-        var obj = Instantiate(segmentPrefab, transform);
-        obj.SetActive(false);
-        pool.Enqueue(obj);
-      }
+      InitializePool();
     }
 
     public GameObject GetSegment()
     {
+      GameObject segment;
+
       if (pool.Count > 0)
       {
-        var obj = pool.Dequeue();
-        obj.SetActive(true);
-        return obj;
+        segment = pool.Dequeue();
+        segment.SetActive(true);
       }
-      // If pool is empty, instantiate a new one (optional: log warning)
-      var newObj = Instantiate(segmentPrefab, transform);
-      newObj.SetActive(true);
-      return newObj;
+      else
+      {
+        // If pool is empty, instantiate a new one (optional: log warning)
+        segment = Instantiate(segmentPrefab, transform);
+        // Configure physics components for newly instantiated segments
+        ConfigureSegmentPhysics(segment);
+      }
+
+      return segment;
     }
 
     public void ReturnSegment(GameObject segment)
     {
       segment.SetActive(false);
+      segment.transform.SetParent(transform); // Ensure it's parented to the pool
       pool.Enqueue(segment);
     }
+
+    private void InitializePool()
+    {
+      for (int i = 0; i < initialPoolSize; i++)
+      {
+        // Create segment with proper parent and physics configuration
+        GameObject segment = Instantiate(segmentPrefab, transform);
+        // Configure physics components for pre-pooled segments
+        ConfigureSegmentPhysics(segment);
+        segment.SetActive(false);
+        pool.Enqueue(segment);
+      }
+      Debug.Log($"SnakeSegmentPool: Initialized pool with {initialPoolSize} segments");
+    }
+
+    // Remove the old Prewarm method or fix it to use ConfigureSegmentPhysics
+    public void Prewarm(int count)
+    {
+      for (int i = 0; i < count; i++)
+      {
+        if (pool.Count >= initialPoolSize + count) break;
+
+        // Create segment with proper parent and physics configuration
+        GameObject segment = Instantiate(segmentPrefab, transform);
+        ConfigureSegmentPhysics(segment);
+        segment.SetActive(false);
+        pool.Enqueue(segment);
+      }
+      Debug.Log($"SnakeSegmentPool: Prewarmed {count} additional segments");
+    }
+
+    // When creating snake segments, ensure they have proper Rigidbody setup
+    private void ConfigureSegmentPhysics(GameObject segment)
+    {
+      Rigidbody rb = segment.GetComponent<Rigidbody>();
+      if (rb == null)
+      {
+        rb = segment.AddComponent<Rigidbody>();
+      }
+
+      // Configure for kinematic movement (controlled by script, not physics)
+      rb.isKinematic = true;
+      rb.useGravity = false;
+
+      // Ensure collider is present and properly configured
+      Collider col = segment.GetComponent<Collider>();
+      if (col == null)
+      {
+        col = segment.AddComponent<SphereCollider>();
+      }
+
+      // Snake segments should NOT be triggers (apple is the trigger)
+      col.isTrigger = false;
+    }
+
+    public int GetPoolCount() => pool.Count;
   }
 }
