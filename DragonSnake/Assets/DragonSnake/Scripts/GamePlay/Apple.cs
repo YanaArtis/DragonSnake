@@ -64,8 +64,10 @@ namespace DragonSnake
         // Trigger snake growth
         if (SnakeController.Instance != null)
         {
+          // Get the actual growth amount from SnakeController
+          int actualGrowthAmount = SnakeController.Instance.GetGrowthPerApple();
           SnakeController.Instance.GrowSnake();
-          Debug.Log($"Apple eaten! Score: +{scoreValue}, Snake will grow by 2 segments");
+          Debug.Log($"Apple eaten! Score: +{scoreValue}, Snake will grow by {actualGrowthAmount} segments");
         }
         else
         {

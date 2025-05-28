@@ -363,5 +363,10 @@ else Debug.Log("SnakeController.OnTick(): trying to call LoseLife() but GameMana
     /// Gets the time elapsed since the game started.
     /// </summary>
     public float GetGameTime() => Time.time - gameStartTime;
+    
+    /// <summary>
+    /// Gets the number of segments that will be added per apple eaten.
+    /// </summary>
+    public int GetGrowthPerApple() => growthPerApple;
   }
 }
