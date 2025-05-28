@@ -14,6 +14,7 @@ namespace DragonSnake
   /// The body segments follow the head smoothly, maintaining a fixed distance between each segment.
   /// Uses separate prefabs for head and body segments.
   /// Handles snake growth when eating apples.
+  /// Implements progressive speed increase over time.
   /// </summary>
   public class SnakeController : MonoBehaviour
   {
@@ -22,8 +23,13 @@ namespace DragonSnake
     [Header("Snake Settings")]
     [SerializeField] private int initialLength = 5;
     [SerializeField] private float segmentRadius = 1f;
-    [SerializeField] private float moveSpeed = 2.5f; // Units per second
     [SerializeField] private int growthPerApple = 2; // How many segments to add per apple
+
+    [Header("Speed Settings")]
+    [SerializeField] private float initialSpeed = 2.5f; // Starting speed
+    [SerializeField] private float maxSpeed = 5.0f; // Maximum speed limit
+    [SerializeField] private float speedIncreaseRate = 0.1f; // Speed increase per interval
+    [SerializeField] private float speedIncreaseInterval = 10f; // Time interval in seconds
 
     [Header("Prefab References")]
     [SerializeField] private GameObject headPrefab;
@@ -37,6 +43,11 @@ namespace DragonSnake
     private readonly Queue<Vector3> headPositions = new Queue<Vector3>();
     private SnakeHeadCollisionDetector headCollisionDetector;
     private int pendingGrowth = 0; // Segments waiting to be added
+
+    // Speed management
+    private float currentSpeed;
+    private float gameStartTime;
+    private float lastSpeedIncreaseTime;
 
     private void Awake()
     {
@@ -153,6 +164,14 @@ else Debug.Log("SnakeController.OnDisable(): GameManager.Instance == null");
         }
         InitializeSnake();
       }
+      else if (next == GameState.Playing && prev != GameState.Paused)
+      {
+        // Reset speed timing when starting a new game (not resuming from pause)
+        gameStartTime = Time.time;
+        lastSpeedIncreaseTime = gameStartTime;
+        currentSpeed = initialSpeed;
+        Debug.Log($"Game started - Speed reset to {currentSpeed}");
+      }
     }
 
     /// <summary>
@@ -168,13 +187,16 @@ else Debug.Log("SnakeController.OnDisable(): GameManager.Instance == null");
       if (segments.Count == 0 || playerHead == null || xrOrigin == null)
         return;
 
+      // Update speed over time
+      UpdateSpeed();
+
       // Move head in the direction the player's head is facing, but only on the horizontal plane
       Vector3 headForward = playerHead.forward;
       headForward.y = 0;
       headForward.Normalize();
 
       Vector3 prevHeadPos = segments[0].position;
-      Vector3 newHeadPos = prevHeadPos + headForward * moveSpeed * deltaTime;
+      Vector3 newHeadPos = prevHeadPos + headForward * currentSpeed * deltaTime;
       newHeadPos.y = 0; // Keep on horizontal plane
 
       segments[0].position = newHeadPos;
@@ -238,6 +260,38 @@ else Debug.Log("SnakeController.OnTick(): trying to call LoseLife() but GameMana
     }
 
     /// <summary>
+    /// Updates the snake's speed over time, increasing it gradually up to the maximum.
+    /// </summary>
+    private void UpdateSpeed()
+    {
+      // Only increase speed if we haven't reached the maximum
+      if (currentSpeed >= maxSpeed)
+        return;
+
+      // Check if it's time to increase speed
+      if (Time.time - lastSpeedIncreaseTime >= speedIncreaseInterval)
+      {
+        float previousSpeed = currentSpeed;
+        currentSpeed = Mathf.Min(currentSpeed + speedIncreaseRate, maxSpeed);
+        lastSpeedIncreaseTime = Time.time;
+
+        Debug.Log($"Speed increased from {previousSpeed:F2} to {currentSpeed:F2} (Max: {maxSpeed})");
+
+        // Optional: Trigger an event or visual feedback when speed increases
+        OnSpeedIncreased(previousSpeed, currentSpeed);
+      }
+    }
+
+    /// <summary>
+    /// Called when the snake's speed increases. Can be used for visual/audio feedback.
+    /// </summary>
+    private void OnSpeedIncreased(float oldSpeed, float newSpeed)
+    {
+      // You can add visual effects, sound effects, or UI notifications here
+      // For example, flash the screen, play a sound, or show a speed indicator
+    }
+
+    /// <summary>
     /// Triggers snake growth by the specified number of segments.
     /// Called when the snake eats an apple.
     /// </summary>
@@ -294,5 +348,20 @@ else Debug.Log("SnakeController.OnTick(): trying to call LoseLife() but GameMana
     /// Gets the number of segments waiting to be added.
     /// </summary>
     public int GetPendingGrowth() => pendingGrowth;
+
+    /// <summary>
+    /// Gets the current movement speed of the snake.
+    /// </summary>
+    public float GetCurrentSpeed() => currentSpeed;
+
+    /// <summary>
+    /// Gets the speed progress as a percentage (0.0 to 1.0).
+    /// </summary>
+    public float GetSpeedProgress() => (currentSpeed - initialSpeed) / (maxSpeed - initialSpeed);
+
+    /// <summary>
+    /// Gets the time elapsed since the game started.
+    /// </summary>
+    public float GetGameTime() => Time.time - gameStartTime;
   }
 }

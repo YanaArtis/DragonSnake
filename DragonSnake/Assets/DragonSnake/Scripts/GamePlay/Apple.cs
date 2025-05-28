@@ -50,7 +50,7 @@ namespace DragonSnake
 
     private void OnTriggerEnter(Collider other)
     {
-      Debug.Log($"Apple.OnTriggerEnter(\"{other.gameObject.name}\")");
+      // Debug.Log($"Apple.OnTriggerEnter(\"{other.gameObject.name}\")");
 
       // Check if snake head touched the apple
       // Only snake head can eat apples - check specifically for "SnakeHead" tag
