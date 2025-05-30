@@ -42,6 +42,9 @@ namespace DragonSnake
         return;
       }
       Instance = this;
+      // Optional: if you want GameManager to persist across scenes (usually SoundManager does this)
+      // DontDestroyOnLoad(gameObject); 
+
       currentLives = startingLives;
       currentScore = 0;
     }
@@ -49,6 +52,14 @@ namespace DragonSnake
     private void Start()
     {
       SetState(GameState.NotStarted);
+    }
+
+    private void OnDestroy()
+    {
+      if (Instance == this)
+      {
+        Instance = null; // Clear singleton instance if this object is destroyed
+      }
     }
 
     /// <summary>
@@ -63,7 +74,7 @@ namespace DragonSnake
       _state = newState;
       Debug.Log($"GameManager: State changed from {prevState} to {_state}");
 
-      OnGameStateChanged?.Invoke(prevState, _state);
+      OnGameStateChanged?.Invoke(prevState, _state); // Event is invoked before state-specific logic
 
       // Stop any previous state coroutine
       if (_stateCoroutine != null)
@@ -141,6 +152,9 @@ namespace DragonSnake
     public void QuitGame()
     {
       Application.Quit();
+#if UNITY_EDITOR
+      UnityEditor.EditorApplication.isPlaying = false;
+#endif
     }
 
     /// <summary>
@@ -157,7 +171,8 @@ namespace DragonSnake
     public void LoseLife()
     {
 Debug.Log("LoseLife()");
-      if (_state != GameState.Playing)
+      // Allow losing life during countdown if snake moves too early (or other pre-play interactions)
+      if (_state != GameState.Playing && _state != GameState.Countdown)
         return;
 
       currentLives--;
@@ -209,6 +224,7 @@ Debug.Log("LoseLife()");
 
     private IEnumerator LevelFailedCoroutine()
     {
+      OnLevelRestart?.Invoke();
       yield return new WaitForSeconds(levelFailedDuration);
       SetState(GameState.Countdown);
     }
